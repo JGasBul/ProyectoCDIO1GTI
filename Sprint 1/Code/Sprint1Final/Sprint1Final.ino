@@ -21,7 +21,7 @@ const int without_salt = 11141; //Measurement without salt in the environment
 const int with_salt = 19481; // Measured with salt in the environment
 
 //--->  Humidity sensor calibration variables
-const int AirValue = 69; // Dry value
+const int AirValue = 7500; // Dry value
 const int WaterValue = 12341; // Value in water
 const int ch_humidity = 1; //Channel where the humidity sensor is to be connected
 
@@ -50,12 +50,39 @@ void setup() {
 void loop() {
   //Message displayed to the user.
   Serial.println("Se tomaron las siguientes medidas: ");
+
   Serial.print("Humedad: ");
-  Serial.print(calc_humidity(take_measure(ch_humidity)));
+  int x = calc_humidity(take_measure(ch_humidity));
+  if (x >= 100)
+  {
+    Serial.print("100");
+  }
+  else if (x <= 0)
+  {
+    Serial.print("0");
+  }
+  else
+  {
+    Serial.print(x);
+  }
   Serial.println("%");
+
   Serial.print("Salinidad: ");
-  Serial.print(calc_salinity(take_measure(ch_salinity)));
+  int y = calc_salinity(take_measure(ch_salinity));
+  if (y >= 100)
+  {
+    Serial.print("100");
+  }
+  else if (y <= 0)
+  {
+    Serial.print("0");
+  }
+  else
+  {
+    Serial.print(y);
+  }
   Serial.println("%");
+  
   delay(1000);
   Serial.println("Tomando siguientes medidas...");
 }
