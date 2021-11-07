@@ -17,12 +17,12 @@ Adafruit_ADS1115 ads1115;
 //--->  Salinity sensor calibration variables
 const int power_pin = 5; // GPIO 5 is used to power the salinity probe
 const int ch_salinity = 0; //Channel where the salinity sensor is to be connected
-const int without_salt = 1; //Measurement without salt in the environment
-const int with_salt = 19481; // Measured with salt in the environment
+const int without_salt = 22250; //Measurement without salt in the environment
+const int with_salt = 30275; // Measured with salt in the environment
 
 //--->  Humidity sensor calibration variables
-const int AirValue = 20275; // Dry value
-const int WaterValue = 275; // Value in water
+const int AirValue = 20400; // Dry value
+const int WaterValue = 10000; // Value in water
 const int ch_humidity = 1; //Channel where the humidity sensor is to be connected
 
 //---> Temperature sensor calibration variables
@@ -55,25 +55,26 @@ void setup() {
 void loop() {
   //Message displayed to the user.
   //Serial.println("Se tomaron las siguientes medidas: ");
-  /*
-    Serial.println("Humedad: ");
-    int x = calc_humidity(take_measure(ch_humidity));
-    //Serial.println(x);
 
-    if (x >= 100)
-    {
-      Serial.print("100");
-    }
-    else if (x <= 0)
-    {
-      Serial.print("0");
-    }
-    else
-    {
-      Serial.print(x);
-    }
-    Serial.println("%");
-  */
+  Serial.print("Humedad: ");
+  int x = calc_humidity(take_measure(ch_humidity));
+  //Serial.println(x);
+
+  if (x >= 100)
+  {
+    Serial.print("100");
+  }
+  else if (x <= 0)
+  {
+    Serial.print("0");
+  }
+  else
+  {
+    Serial.print(x);
+  }
+  Serial.println("%");
+
+
   Serial.print("Salinidad: ");
   int y = calc_salinity(take_measure(ch_salinity));
   //Serial.println(y);
@@ -92,26 +93,29 @@ void loop() {
   }
   Serial.println("%");
 
-  /*
-    Serial.print("Temperature: ");
-    Serial.print(calc_temperature(take_measure(ch_temperature)));
-    Serial.println("º");
-  */
+  Serial.print("Temperature: ");
+  Serial.print(calc_temperature(take_measure(ch_temperature)));
+  Serial.println("º");
+
   delay(1000);
 
   Serial.println("Tomando siguientes medidas...");
 }
 
 int calc_humidity(float humidityRAW) {
-  Serial.print("Humedad raw: ");
-  Serial.println(humidityRAW);
+  /*
+    Serial.print("Humedad raw: ");
+    Serial.println(humidityRAW);
+  */
   int humidity = 100 * AirValue / (AirValue - WaterValue) - humidityRAW * 100 / (AirValue - WaterValue);
   return humidity;
 }
 
 int calc_salinity(float salinityRAW) {
-  Serial.print("Salinidad raw: ");
-  Serial.println(salinityRAW);
+  /*
+    Serial.print("Salinidad raw: ");
+    Serial.println(salinityRAW);
+  */
   int salinity_percentage = map(salinityRAW, without_salt, with_salt, 0, 100);
   return salinity_percentage;
 }
@@ -139,7 +143,7 @@ float take_measure(int num_channel) {
       }
       break;
     case 1: case 2:
-      Serial.println("Soy Concha, entro");
+      //Serial.println("Soy yo, Concha. Entro");
       for ( i = 1; i <= n_measure; i++ ) {
         sum += ads1115.readADC_SingleEnded(num_channel); // We read the values
       }
