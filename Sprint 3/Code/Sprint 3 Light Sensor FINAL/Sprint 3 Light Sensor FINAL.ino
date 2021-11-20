@@ -59,8 +59,6 @@ void setup() {
 
 void loop() {
   //Message displayed to the user.
-  //Serial.println("Se tomaron las siguientes medidas: ");
-
   Serial.print("Humedad: ");
   int x = calc_humidity(take_measure(ch_humidity));
   //Serial.println(x);
@@ -105,10 +103,12 @@ void loop() {
   delay(1000);
 
   Serial.print("Lightness: ");
-  Serial.print(calc_lightness(take_measure(ch_lightness)));
+  calc_lightness(take_measure(ch_lightness));
 
   Serial.println("Tomando siguientes medidas...");
 }
+
+//Calculations
 
 int calc_humidity(float humidityRAW) {
   /*
@@ -134,18 +134,21 @@ int calc_temperature(float v) {
 }
 
 void calc_lightness(float l) {
-   if (x <= darkness) {
-    Serial.println("esta oscuro");
+  if (l <= darkness) {
+    Serial.println("Esta oscuro");
   }
-  else if (x >= max_lightness) {
-    Serial.println("esta sol");
+  else if (l >= max_lightness) {
+    Serial.println("Esta sol");
   }
   else {
-    Serial.println("esta nublado");
+    Serial.println("Esta nublado");
   }
 
   delay(1000);
 }
+
+//Measurement extraction
+
 float take_measure(int num_channel) {
 
   int i;
