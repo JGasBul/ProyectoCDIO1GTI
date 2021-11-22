@@ -31,7 +31,7 @@ const float slope_line = 0.0345;
 const int ch_temperature = 2;
 
 //---> Light sensor variables
-const int darkness = 30; // Darkness value
+const int darkness = 65; // Darkness value
 const int max_lightness = 29500; // Max Lightness value
 const int ch_lightness = 3; //Channel where the Light sensor is to be connected
 
@@ -59,6 +59,7 @@ void setup() {
 
 void loop() {
   //Message displayed to the user.
+
   Serial.print("Humedad: ");
   int x = calc_humidity(take_measure(ch_humidity));
   //Serial.println(x);
@@ -96,16 +97,16 @@ void loop() {
   }
   Serial.println("%");
 
-  Serial.print("Temperature: ");
+  Serial.print("Temperatura: ");
   Serial.print(calc_temperature(take_measure(ch_temperature)));
   Serial.println("º");
 
-  delay(1000);
 
-  Serial.print("Lightness: ");
+  Serial.print("Cantidad de luz: ");
   calc_lightness(take_measure(ch_lightness));
 
   Serial.println("Tomando siguientes medidas...");
+  delay(1000);
 }
 
 //Calculations
@@ -134,11 +135,15 @@ int calc_temperature(float v) {
 }
 
 void calc_lightness(float l) {
+  /*
+    Serial.print("Lightness RAW: ");
+    Serial.println(l);
+  */
   if (l <= darkness) {
     Serial.println("Esta oscuro");
   }
   else if (l >= max_lightness) {
-    Serial.println("Esta sol");
+    Serial.println("Esta soleado");
   }
   else {
     Serial.println("Esta nublado");
@@ -156,8 +161,12 @@ float take_measure(int num_channel) {
 
   reading = 0.0;
   sum = 0.0;
-
+  /*
+    Serial.print("Numero de canal: ");
+    Serial.println(num_channel);
+  */
   switch (num_channel) {
+
     case 0:
       for ( i = 1; i <= n_measure; i++ ) {
         digitalWrite( power_pin, HIGH ); // We give power to the sensor
@@ -167,7 +176,7 @@ float take_measure(int num_channel) {
         delay(10); // We wait for the results
       }
       break;
-    case 1: case 2:
+    case 1: case 2: case 3:
       //Serial.println("Soy yo, Concha. Entro");
       for ( i = 1; i <= n_measure; i++ ) {
         sum += ads1115.readADC_SingleEnded(num_channel); // We read the values
@@ -182,6 +191,7 @@ float take_measure(int num_channel) {
 
   reading = sum / float(n_measure);
   if (num_channel == 2) {
+    //Serial.println("Entro en caso especial channel 2");
     reading = ((reading * 4.096) / (pow(2, 15) - 1));
   }
   return reading;
