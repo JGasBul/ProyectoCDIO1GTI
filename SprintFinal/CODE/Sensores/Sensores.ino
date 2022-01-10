@@ -15,6 +15,20 @@
 #define REST_SERVER_THINGSPEAK //Selecciona tu canal para ver los datos en la web (https://thingspeak.com/channels/360979)
 //#define REST_SERVER_DWEET //Selecciona tu canal para ver los datos en la web (http://dweet.io/follow/PruebaGTI)
 
+//Variables Acelerometro
+#define MPU9250_ADDRESS 0x68
+#define MAG_ADDRESS 0x0C
+
+#define GYRO_FULL_SCALE_250_DPS 0x00
+#define GYRO_FULL_SCALE_500_DPS 0x08
+#define GYRO_FULL_SCALE_1000_DPS 0x10
+#define GYRO_FULL_SCALE_2000_DPS 0x18
+
+#define ACC_FULL_SCALE_2_G 0x00
+#define ACC_FULL_SCALE_4_G 0x08
+#define ACC_FULL_SCALE_8_G 0x10
+#define ACC_FULL_SCALE_16_G 0x18
+
 // ------------------------------------------------------------
 // Builders
 // ------------------------------------------------------------
@@ -63,7 +77,7 @@ const char Rest_Host[] = "dweet.io";
 String MyWriteAPIKey = "cdiocurso2021_2022g07.."; // Escribe la clave de tu canal Dweet
 #endif
 
-#define NUM_FIELDS_TO_SEND 4 //Numero de medidas a enviar al servidor REST (Entre 1 y 8)
+#define NUM_FIELDS_TO_SEND 5 //Numero de medidas a enviar al servidor REST (Entre 1 y 8)
 
 // ------------------------------------------------------------
 // Pin Definitions
@@ -211,6 +225,28 @@ void HTTPGet(String fieldData[], int numFields)
   }
 }
 
+//Funcion auxiliar lectura
+void I2Cread(uint8_t Address, uint8_t Register, uint8_t Nbytes, uint8_t *Data)
+{
+  Wire.beginTransmission(Address);
+  Wire.write(Register);
+  Wire.endTransmission();
+
+  Wire.requestFrom(Address, Nbytes);
+  uint8_t index = 0;
+  while (Wire.available())
+    Data[index++] = Wire.read();
+}
+
+// Funcion auxiliar de escritura
+void I2CwriteByte(uint8_t Address, uint8_t Register, uint8_t Data)
+{
+  Wire.beginTransmission(Address);
+  Wire.write(Register);
+  Wire.write(Data);
+  Wire.endTransmission();
+}
+
 void setup()
 {
 
@@ -241,6 +277,9 @@ void setup()
 
   //---> Send ads1115 to sensors.
   sensors.setAdaFruit(ads1115);
+
+  // Configurar acelerometro
+  I2CwriteByte(MPU9250_ADDRESS, 28, ACC_FULL_SCALE_16_G);
 }
 
 void loop()
@@ -312,12 +351,51 @@ void loop()
   Serial.println("%");
 #endif
 
+  // ---  Lectura acelerometro ---
+  uint8_t Buf[14];
+  int FS_ACC = 16;
+  int FS_GYRO = 2000;
+
+  I2Cread(MPU9250_ADDRESS, 0x3B, 14, Buf);
+
+  //   // Convertir registros acelerometro
+  float ax = (Buf[0] << 8 | Buf[1]);
+  float ay = (Buf[2] << 8 | Buf[3]);
+  float az = Buf[4] << 8 | Buf[5];
+
+  ax = ax * FS_ACC / 32768;
+  ay = ay * FS_ACC / 32768;
+  az = az * FS_ACC / 32768;
+
+  // Acelerometro
+#ifdef PRINT_DEBUG_MESSAGES
+  Serial.println("Lectura Acelerometro");
+  Serial.print("AX=");
+  Serial.print(ax);
+  Serial.print("g");
+  Serial.print("\t");
+  Serial.print("AY=");
+  Serial.print(ay);
+  Serial.print("g");
+  Serial.print("\t");
+  Serial.print("AZ=");
+  Serial.print(az);
+  Serial.println("g");
+#endif
+  int alarm = 0;
+  if (ay < 30 || ay > 35)
+  {
+    alarm = 1;
+  }
+
+  data[5] = String(alarm);
+
   //Selecciona si quieres enviar con GET(ThingSpeak o Dweet) o con POST(ThingSpeak)
   HTTPPost(data, NUM_FIELDS_TO_SEND);
   //HTTPGet( data, NUM_FIELDS_TO_SEND );
 
   //Selecciona si quieres un retardo de 15seg para hacer pruebas o dormir el SparkFun
-  delay(1500);//15000
+  delay(1500); //15000
   //Serial.print( "Goodnight" );
   //ESP.deepSleep( sleepTimeSeconds * 1000000 );
 }
