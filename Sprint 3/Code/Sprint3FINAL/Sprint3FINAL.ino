@@ -130,6 +130,10 @@ int calc_salinity(float salinityRAW) {
 }
 
 int calc_temperature(float v) {
+  /*
+    Serial.print("Temperature RAW: ");
+    Serial.println(v);
+  */
   int Temp = ((v - temp_coeff) / slope_line);
   return Temp;
 }
@@ -148,8 +152,15 @@ void calc_lightness(float l) {
   else {
     Serial.println("Esta nublado");
   }
-
-  delay(1000);
+  int l_percentage = map(l, darkness, max_lightness, 0, 100);
+  Serial.print("Cantidad de luz final: ");
+  if (l_percentage < 0) {
+    l_percentage = 0;
+  } else if (l_percentage > 100) {
+    l_percentage = 100;
+  }
+  Serial.print(l_percentage);
+  Serial.println("%");
 }
 
 //Measurement extraction
@@ -190,6 +201,10 @@ float take_measure(int num_channel) {
 
 
   reading = sum / float(n_measure);
+  /*
+    Serial.print("READING: ");
+    Serial.println(reading);
+  */
   if (num_channel == 2) {
     //Serial.println("Entro en caso especial channel 2");
     reading = ((reading * 4.096) / (pow(2, 15) - 1));
