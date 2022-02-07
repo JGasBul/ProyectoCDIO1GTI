@@ -383,7 +383,7 @@ void loop()
   Serial.println("g");
 #endif
   int alarm = 0;
-  if (ay < 30 || ay > 35)
+  if (ay < 30||ay > 35)
   {
     alarm = 1;
   }
